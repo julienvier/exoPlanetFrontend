@@ -1,5 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import rotateLeft from '../assets/rotate-left.svg';
+import rotateRight from '../assets/rotate-right.svg';
 
 @customElement('robot-controls')
 export class RobotControls extends LitElement {
@@ -42,6 +44,11 @@ export class RobotControls extends LitElement {
             transition: background-color 0.2s ease;
         }
 
+        img {
+            width: 25px;
+            color: white;
+        }
+        
         button:hover {
             background-color: #0056b3;
         }
@@ -90,17 +97,17 @@ export class RobotControls extends LitElement {
                 <div class="control-grid">
                     <!-- Oben in der mittleren Zelle -->
                     <div></div>
-                    <button @click=${this.onUp}>↑</button>
+                    <button @click=${this.onUp}>MOVE</button>
                     <div></div>
 
                     <!-- Mitte links, MOVE-Button, Mitte rechts -->
-                    <button @click=${this.onLeft}>←</button>
-                    <button @click=${this.onMove}>MOVE</button>
-                    <button @click=${this.onRight}>→</button>
+                    <button @click=${this.onLeft}><img src="${rotateLeft}"></button>
+                    <button @click=${this.onMove}>SCAN</button>
+                    <button @click=${this.onRight}><img src="${rotateRight}"></button>
 
                     <!-- Unten in der mittleren Zelle -->
                     <div></div>
-                    <button @click=${this.onDown}>↓</button>
+                   <!-- <button @click=${this.onDown}>↓</button> -->
                     <div></div>
                 </div>
             </div>

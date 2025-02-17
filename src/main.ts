@@ -3,6 +3,7 @@ import './components/exo-grid';
 import './components/robot-controls';
 import './components/legend-element';
 import './components/sidebar-element'
+import './components/robot-mover';
 
 const staticGridSize = { rows: 10, cols: 10 };
 
@@ -30,11 +31,14 @@ class ExoGridApp extends HTMLElement {
 
         const navElement = document.createElement('sidebar-component');
 
+        const robot = document.getElementById('robot-mover');
+
         if (this.shadowRoot) {
             this.shadowRoot.appendChild(navbarElement);
             this.shadowRoot.appendChild(navElement);
             this.shadowRoot.appendChild(gridElement);
             this.shadowRoot.appendChild(controlsElement);
+            this.shadowRoot.appendChild(robot);
 
         }
     }
