@@ -74,8 +74,8 @@ export class RobotControls extends LitElement {
         console.log('MOVE command triggered');
     }
 
-    private onUp() {
-        console.log('UP (forward / north)');
+    private onScan() {
+        console.log('Scan');
     }
 
     private onDown() {
@@ -97,12 +97,12 @@ export class RobotControls extends LitElement {
                 <div class="control-grid">
                     <!-- Oben in der mittleren Zelle -->
                     <div></div>
-                    <button @click=${this.onUp}>MOVE</button>
+                    <button @click=${this.onMove}>MOVE</button>
                     <div></div>
 
                     <!-- Mitte links, MOVE-Button, Mitte rechts -->
                     <button @click=${this.onLeft}><img src="${rotateLeft}"></button>
-                    <button @click=${this.onMove}>SCAN</button>
+                    <button @click=${this.onScan}>SCAN</button>
                     <button @click=${this.onRight}><img src="${rotateRight}"></button>
 
                     <!-- Unten in der mittleren Zelle -->
