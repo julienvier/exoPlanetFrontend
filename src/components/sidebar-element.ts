@@ -10,13 +10,11 @@ class SidebarComponent extends HTMLElement {
         this.positionX = 0;
         this.positionY = 0;
     }
-
     connectedCallback() {
         this.render();
         this.fetchRobotData();
         this.fetchAvailableRobots();
     }
-
     async fetchRobotData() {
         try {
             const response = await fetch('http://localhost:8088/api/robot/position');
@@ -31,7 +29,6 @@ class SidebarComponent extends HTMLElement {
             console.error('Fehler beim Abrufen der Roboter-Daten:', error);
         }
     }
-
     async fetchAvailableRobots() {
         try {
             const response = await fetch('http://localhost:8088/api/robots');
@@ -44,19 +41,15 @@ class SidebarComponent extends HTMLElement {
             console.error('Fehler beim Abrufen der verfügbaren Roboter:', error);
         }
     }
-
     handleNameChange(event) {
         this.robotName = event.target.value;
     }
-
     handleXChange(event) {
         this.positionX = parseInt(event.target.value, 10) || 0;
     }
-
     handleYChange(event) {
         this.positionY = parseInt(event.target.value, 10) || 0;
     }
-
     async handleCreateRobotClick() {
         try {
             const response = await fetch('http://localhost:8088/api/robots', {
@@ -75,7 +68,6 @@ class SidebarComponent extends HTMLElement {
             console.error('Fehler beim Erstellen des Roboters:', error);
         }
     }
-
     async handleLandClick() {
         try {
             const response = await fetch('http://localhost:8088/api/positions', {
@@ -85,7 +77,7 @@ class SidebarComponent extends HTMLElement {
                 },
                 body: JSON.stringify({
                     planetID: 1, // Beispiel-Planten-ID
-                    robotID: 1,  // Beispiel-Roboter-ID
+                    robotID: this.robotName,  // Verwendung des Namens als ID
                     x: this.positionX,
                     y: this.positionY,
                     terrain: 'unknown'
@@ -97,7 +89,9 @@ class SidebarComponent extends HTMLElement {
             console.error('Fehler beim Senden der Land-Position:', error);
         }
     }
-
+    handleDirectionChange(event) {
+        this.robotDirection = event.target.value;
+    }
     render() {
         if (this.shadowRoot) {
             this.shadowRoot.innerHTML = `
@@ -135,14 +129,25 @@ class SidebarComponent extends HTMLElement {
                         border-radius: 8px;
                         text-align: center;
                     }
-                    .input-group,
-                    .actions {
-                        margin-top: 20px;
+                    .input-group {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        margin-top: 15px;
+                        margin-bottom: 20px;
                         width: 100%;
                     }
                     input[type="text"],
                     input[type="number"] {
                         width: calc(100% - 16px);
+                        padding: 8px;
+                        border-radius: 8px;
+                        border: 1px solid #ccc;
+                        margin-bottom: 10px;
+                    }
+ 
+                    select {
+                        width: 100%;
                         padding: 8px;
                         border-radius: 8px;
                         border: 1px solid #ccc;
@@ -156,7 +161,7 @@ class SidebarComponent extends HTMLElement {
                         color: white;
                         border: none;
                         cursor: pointer;
-                        margin-bottom: 5px;
+                        margin-bottom: 10px;
                     }
                     button:hover {
                         background: #45a049;
@@ -172,13 +177,18 @@ class SidebarComponent extends HTMLElement {
                 <div class="input-group">
                     <input type="text" placeholder="Neuer Roboternamen eingeben" value="${this.robotName}" 
                         oninput="this.getRootNode().host.handleNameChange(event)">
+                    <button onclick="this.getRootNode().host.handleCreateRobotClick()">Roboter Erstellen</button>
                     <input type="number" placeholder="Position X" value="${this.positionX}" 
                         oninput="this.getRootNode().host.handleXChange(event)">
                     <input type="number" placeholder="Position Y" value="${this.positionY}" 
                         oninput="this.getRootNode().host.handleYChange(event)">
-                </div>
-                <div class="actions">
-                    <button onclick="this.getRootNode().host.handleCreateRobotClick()">Roboter Erstellen</button>
+                    <select oninput="this.getRootNode().host.handleDirectionChange(event)">
+                        <option value="">Himmelsrichtung wählen</option>
+                        <option value="NORTH">NORTH</option>
+                        <option value="EAST">EAST</option>
+                        <option value="SOUTH">SOUTH</option>
+                        <option value="WEST">WEST</option>
+                    </select>
                     <button onclick="this.getRootNode().host.handleLandClick()">Land</button>
                 </div>
             `;
