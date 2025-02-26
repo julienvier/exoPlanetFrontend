@@ -60,9 +60,27 @@ export class ExoGrid extends LitElement {
         }
     `;
 
-    updated(changedProperties) {
-        if (changedProperties.has('rows') || changedProperties.has('cols')) {
-            this.requestUpdate();
+    async connectedCallback() {
+        super.connectedCallback();
+        await this.fetchPlanetSize();
+    }
+
+    async fetchPlanetSize() {
+        try {
+            const response = await fetch('http://localhost:8088/api/planet-size');
+            const data = await response.json();
+
+            if (data.Height && data.Width) {
+                this.rows = data.Height;
+                this.cols = data.Width;
+                console.log(`Planet size received: ${this.rows} x ${this.cols}`);
+            } else {
+                console.error("Invalid response format", data);
+            }
+        } catch (error) {
+            console.error("Error fetching planet size:", error);
+        } finally {
+            this.isLoading = false;
         }
     }
 
