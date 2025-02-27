@@ -15,8 +15,8 @@ class NavbarComponent extends HTMLElement {
     }
 
     attachEventListeners() {
-        const hamburgerButton = this.shadowRoot?.querySelector('.hamburger');
-        const legendElement = this.shadowRoot?.querySelector('legend-component');
+        const hamburgerButton = this.shadowRoot?.querySelector('.hamburger') as HTMLElement | null;
+        const legendElement = this.shadowRoot?.querySelector('legend-component') as HTMLElement | null;
 
         if (hamburgerButton && legendElement) {
             hamburgerButton.addEventListener('click', () => {

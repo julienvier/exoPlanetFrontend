@@ -1,62 +1,33 @@
-import './components/nav-element'
+import { LitElement, html, css } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
+import './components/nav-element';
 import './components/exo-grid';
 import './components/robot-controls';
 import './components/legend-element';
-import './components/sidebar-element'
+import './components/left-nav-element';
 import './components/robot-mover';
+import './components/right-nav-element';
 
 const staticGridSize = { rows: 10, cols: 10 };
 
-class ExoGridApp extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+@customElement('exo-grid-app')
+export class ExoGridApp extends LitElement {
+    static styles = css`
+    :host {
+      display: flex;
+      position: relative;
     }
-
-    connectedCallback() {
-        this.render();
-        this.initializeGrid();
-    }
-
-    async initializeGrid() {
-        const gridElement = document.createElement('exo-grid');
-
-        const { rows, cols } = staticGridSize;
-        gridElement.setAttribute('rows', rows.toString());
-        gridElement.setAttribute('cols', cols.toString());
-
-        const controlsElement = document.createElement('robot-controls');
-
-        const navbarElement = document.createElement('navbar-component');
-
-        const navElement = document.createElement('sidebar-component');
-
-        const robot = document.getElementById('robot-mover');
-
-        if (this.shadowRoot) {
-            this.shadowRoot.appendChild(navbarElement);
-            this.shadowRoot.appendChild(navElement);
-            this.shadowRoot.appendChild(gridElement);
-            this.shadowRoot.appendChild(controlsElement);
-            this.shadowRoot.appendChild(robot);
-
-        }
-    }
+  `;
 
     render() {
-        if (this.shadowRoot) {
-            this.shadowRoot.innerHTML = `
-                <style>
-                    :host {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        gap: 1rem;
-                    }
-                </style>
-            `;
-        }
+        return html`
+      <navbar-component></navbar-component>
+      <left-nav-component></left-nav-component>
+      <exo-grid .rows=${staticGridSize.rows} .cols=${staticGridSize.cols}></exo-grid>
+      <robot-controls></robot-controls>
+      <!--<robot-mover></robot-mover>-->
+      <right-nav-element></right-nav-element>
+    `;
     }
 }
-
-customElements.define('exo-grid-app', ExoGridApp);
