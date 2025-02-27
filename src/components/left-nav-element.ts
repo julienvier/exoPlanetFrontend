@@ -187,6 +187,7 @@ export class LeftNavComponent extends LitElement {
                     robotID: this.robotName,
                     x: this.positionX,
                     y: this.positionY,
+                    robotDirection: this.robotDirection,
                 })
             });
             const data = await response.json();
