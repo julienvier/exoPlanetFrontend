@@ -7,7 +7,6 @@ export class LeftNavComponent extends LitElement {
     @state() robotPosition: string = 'N/A';
     @state() robotTemperature: string = 'N/A';
     @state() robotDirection: string = 'N/A';
-    @state() availableRobots: Array<{ name: string }> = [];
     @state() positionX: number = 0;
     @state() positionY: number = 0;
 
@@ -87,15 +86,25 @@ export class LeftNavComponent extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         this.fetchRobotData();
-        this.fetchAvailableRobots();
+        window.addEventListener('robot-selected', this.handleRobotSelected.bind(this));
     }
 
-    /**
-     * Holt die aktuellen Roboterdaten.
-     */
-    async fetchRobotData() {
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('robot-selected', this.handleRobotSelected.bind(this));
+    }
+
+    private async handleRobotSelected(event: Event) {
+        const customEvent = event as CustomEvent;
+        this.robotName = customEvent.detail.robotName;
+        await this.fetchRobotData(); // Neue Position abrufen
+    }
+
+    private async fetchRobotData() {
+        if (!this.robotName) return;
+
         try {
-            const response = await fetch('http://localhost:8088/api/positions');
+            const response = await fetch(`http://localhost:8088/api/positions?robot=${this.robotName}`);
             if (response.ok) {
                 const data = await response.json();
                 this.robotPosition = data.position || 'N/A';
@@ -109,80 +118,29 @@ export class LeftNavComponent extends LitElement {
         }
     }
 
-    /**
-     * Holt die Liste der verfügbaren Roboter.
-     */
-    async fetchAvailableRobots() {
-        try {
-            const response = await fetch('http://localhost:8088/api/robots');
-            if (response.ok) {
-                const data = await response.json();
-                this.availableRobots = data.robots || [];
-            } else {
-                console.error(`HTTP-Fehler: ${response.status}`);
-            }
-        } catch (error) {
-            console.error('Fehler beim Abrufen der verfügbaren Roboter:', error);
-        }
-    }
-
-    /**
-     * Handler für die Namensänderung.
-     */
-    handleNameChange(event: Event) {
+    private handleInputChange(event: Event, property: 'robotName' | 'positionX' | 'positionY') {
         const input = event.target as HTMLInputElement;
-        this.robotName = input.value;
+        this[property] = property === 'robotName' ? input.value : parseInt(input.value, 10) || 0;
     }
 
-    /**
-     * Handler für die X-Positionsänderung.
-     */
-    handleXChange(event: Event) {
-        const input = event.target as HTMLInputElement;
-        this.positionX = parseInt(input.value, 10) || 0;
-    }
-
-    /**
-     * Handler für die Y-Positionsänderung.
-     */
-    handleYChange(event: Event) {
-        const input = event.target as HTMLInputElement;
-        this.positionY = parseInt(input.value, 10) || 0;
-    }
-
-    /**
-     * Erstellt einen neuen Roboter.
-     */
-    async handleCreateRobotClick() {
+    private async handleCreateRobotClick() {
         try {
             const response = await fetch('http://localhost:8088/api/robots', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    status: 'waiting',
-                    name: this.robotName
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'waiting', name: this.robotName })
             });
-            const data = await response.json();
-            console.log(data.message);
-            this.fetchAvailableRobots(); // Aktualisiere die Roboterliste nach dem Erstellen
+            console.log(await response.json());
         } catch (error) {
             console.error('Fehler beim Erstellen des Roboters:', error);
         }
     }
 
-    /**
-     * Sendet die Land-Position des Roboters.
-     */
-    async handleLandClick() {
+    private async handleLandClick() {
         try {
             const response = await fetch('http://localhost:8088/api/land', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     robotID: this.robotName,
                     x: this.positionX,
@@ -190,36 +148,31 @@ export class LeftNavComponent extends LitElement {
                     robotDirection: this.robotDirection,
                 })
             });
-            const data = await response.json();
-            console.log(data.message);
+            console.log(await response.json());
         } catch (error) {
             console.error('Fehler beim Senden der Land-Position:', error);
         }
     }
 
-    /**
-     * Handler für die Richtungsänderung.
-     */
-    handleDirectionChange(event: Event) {
-        const select = event.target as HTMLSelectElement;
-        this.robotDirection = select.value;
+    private async handleDisconnectClick() {
+        try {
+            const response = await fetch('http://localhost:8088/api/disconnect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    robotID: this.robotName,
+                })
+            });
+            console.log(await response.json());
+        } catch (error) {
+            console.error('Fehler beim Senden der Disconnect funktion:', error);
+        }
     }
 
-    /**
-     * Escaped HTML, um XSS-Angriffe zu vermeiden.
-     */
     private escapeHTML(unsafe: string): string {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    /**
-     * Rendert die Komponente.
-     */
     render() {
         return html`
             <div class="title">Roboter Info</div>
@@ -229,26 +182,11 @@ export class LeftNavComponent extends LitElement {
                 <div><strong>Richtung:</strong> ${this.escapeHTML(this.robotDirection)}</div>
             </div>
             <div class="input-group">
-                <input
-                        type="text"
-                        placeholder="Neuer Roboternamen eingeben"
-                        .value=${this.robotName}
-                        @input=${this.handleNameChange}
-                />
+                <input type="text" placeholder="Robotername" .value=${this.robotName} @input=${(e: Event) => this.handleInputChange(e, 'robotName')} />
                 <button @click=${this.handleCreateRobotClick}>Roboter Erstellen</button>
-                <input
-                        type="number"
-                        placeholder="Position X"
-                        .value=${this.positionX}
-                        @input=${this.handleXChange}
-                />
-                <input
-                        type="number"
-                        placeholder="Position Y"
-                        .value=${this.positionY}
-                        @input=${this.handleYChange}
-                />
-                <select @input=${this.handleDirectionChange}>
+                <input type="number" placeholder="Position X" .value=${this.positionX} @input=${(e: Event) => this.handleInputChange(e, 'positionX')} />
+                <input type="number" placeholder="Position Y" .value=${this.positionY} @input=${(e: Event) => this.handleInputChange(e, 'positionY')} />
+                <select @input=${(e: Event) => this.robotDirection = (e.target as HTMLSelectElement).value}>
                     <option value="">Himmelsrichtung wählen</option>
                     <option value="NORTH">NORTH</option>
                     <option value="EAST">EAST</option>
@@ -256,6 +194,7 @@ export class LeftNavComponent extends LitElement {
                     <option value="WEST">WEST</option>
                 </select>
                 <button @click=${this.handleLandClick}>Land</button>
+                <button @click=${this.handleDisconnectClick}>Disconnect</button>
             </div>
         `;
     }
