@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import {customElement, state} from 'lit/decorators.js';
 
 interface Robot {
     RobotID: string;
@@ -8,6 +8,10 @@ interface Robot {
 
 @customElement('right-nav-element')
 export class RightNavElement extends LitElement {
+
+    @state()
+    private selectedRobot: Robot | null = null;
+
     // Reaktiver State für verfügbare Roboter
     @state()
     private availableRobots: Robot[] = [];
@@ -134,37 +138,41 @@ export class RightNavElement extends LitElement {
         }
     }
 
-    private async handleSelectRobot(robotName: string) {
+    private async handleSelectRobot(robot: Robot) {
+        this.selectedRobot = robot; // Speichert den ausgewählten Roboter
+
+        // Event auslösen, damit `left-nav-component` den Namen bekommt
+        this.dispatchEvent(new CustomEvent('robot-selected', {
+            detail: { robotName: robot.RobotID },
+            bubbles: true,
+            composed: true
+        }));
+
         try {
             const response = await fetch('http://localhost:8088/api/currentRobot', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name: robotName })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: robot.RobotID })
             });
+
             if (response.ok) {
                 const data = await response.json();
                 console.log(`Antwort vom Server: ${data.message}`);
-                this.feedbackMessage = `Roboter "${robotName}" wurde ausgewählt.`;
-                setTimeout(() => {
-                    this.feedbackMessage = '';
-                }, 3000); // Nachricht nach 3 Sekunden ausblenden
+                this.feedbackMessage = `Roboter "${robot.RobotID}" wurde ausgewählt.`;
             } else {
                 console.error(`HTTP-Fehler: ${response.status}`);
-                this.feedbackMessage = `Fehler beim Auswählen von "${robotName}".`;
-                setTimeout(() => {
-                    this.feedbackMessage = '';
-                }, 3000);
+                this.feedbackMessage = `Fehler beim Auswählen von "${robot.RobotID}".`;
             }
         } catch (error) {
             console.error('Fehler beim Auswählen des Roboters:', error);
-            this.feedbackMessage = `Fehler beim Auswählen von "${robotName}".`;
-            setTimeout(() => {
-                this.feedbackMessage = '';
-            }, 3000);
+            this.feedbackMessage = `Fehler beim Auswählen von "${robot.RobotID}".`;
         }
+
+        setTimeout(() => {
+            this.feedbackMessage = '';
+        }, 3000);
     }
+
 
     /**
      * Escaped HTML, um XSS-Angriffe zu vermeiden.
@@ -188,14 +196,19 @@ export class RightNavElement extends LitElement {
                         ? this.availableRobots.map(robot => html`
                             <div class="robot-item">
                                 <span class="robot-name">${this.escapeHTML(robot.RobotID)}</span>
-                                <button @click=${() => this.handleSelectRobot(robot.RobotID)}>Auswählen</button>
+                                <button @click=${() => this.handleSelectRobot(robot)}>Auswählen</button>
                             </div>
                         `)
                         : html`<div class="loading">Keine Roboter verfügbar. Lade...</div>`}
             </div>
+            ${this.selectedRobot
+                    ? html`<div class="selected-robot">Ausgewählt: ${this.escapeHTML(this.selectedRobot.RobotID)}</div>`
+                    : ''
+            }
             ${this.feedbackMessage
                     ? html`<div class="feedback">${this.feedbackMessage}</div>`
                     : ''}
         `;
     }
+
 }
