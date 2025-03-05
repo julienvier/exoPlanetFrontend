@@ -1,10 +1,13 @@
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import {customElement, property} from 'lit/decorators.js';
 import rotateLeft from '../assets/rotate-left.svg';
 import rotateRight from '../assets/rotate-right.svg';
 
 @customElement('robot-controls')
 export class RobotControls extends LitElement {
+
+    @property({ type: String }) robotName: string = 'ExoBot1';
+
     static styles = css`
         :host {
             display: flex;
@@ -70,24 +73,76 @@ export class RobotControls extends LitElement {
         }
     `;
 
-    private onMove() {
+    private async onMove() {
+        try {
+            const response = await fetch('http://localhost:8088/api/move', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({robotID: this.robotName})
+            });
+            console.log(await response.json());
+        } catch (error) {
+            console.error(error);
+        }
         console.log('MOVE command triggered');
     }
 
-    private onScan() {
-        console.log('Scan');
+    private async onScan() {
+        try {
+            const response = await fetch('http://localhost:8088/api/scan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({robotID: this.robotName})
+            });
+            console.log(await response.json());
+        } catch (error) {
+            console.error(error);
+        }
+        console.log('Scan Command triggered');
     }
 
-    private onDown() {
-        console.log('DOWN (backward / south)');
+    private async onLeft() {
+        try {
+            const response = await fetch('http://localhost:8088/api/left', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({robotID: this.robotName})
+            });
+            console.log(await response.json());
+        } catch (error) {
+            console.error(error);
+        }
+        console.log('Rotate left command triggered');
     }
 
-    private onLeft() {
-        console.log('LEFT');
+    private async onRight() {
+
+        try {
+            const response = await fetch('http://localhost:8088/api/right', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({robotID: this.robotName})
+            });
+            console.log(await response.json());
+        } catch (error) {
+            console.error(error);
+        }
+        console.log('Rotate Right command triggered');
     }
 
-    private onRight() {
-        console.log('RIGHT');
+    private async onAutomate() {
+
+        try {
+            const response = await fetch('http://localhost:8088/api/explore', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({status: 'waiting', robotID: this.robotName})
+            });
+            console.log(await response.json());
+        } catch (error) {
+            console.error('Error on sending Automate Movement command:', error);
+        }
+        console.log('Automate Movement command triggered');
     }
 
     render() {
@@ -107,7 +162,7 @@ export class RobotControls extends LitElement {
 
                     <!-- Unten in der mittleren Zelle -->
                     <div></div>
-                   <!-- <button @click=${this.onDown}>↓</button> -->
+                    <button @click=${this.onAutomate}>AUTO</button>
                     <div></div>
                 </div>
             </div>
