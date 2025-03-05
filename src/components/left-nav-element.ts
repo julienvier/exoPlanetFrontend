@@ -120,6 +120,7 @@ export class LeftNavComponent extends LitElement {
 
     private handleInputChange(event: Event, property: 'robotName' | 'positionX' | 'positionY') {
         const input = event.target as HTMLInputElement;
+        // @ts-ignore
         this[property] = property === 'robotName' ? input.value : parseInt(input.value, 10) || 0;
     }
 
