@@ -87,7 +87,8 @@ export class ExoGrid extends LitElement {
 
         this.fetchIntervalId = window.setInterval(() => {
             this.fetchPositions();
-        }, 5000);
+            this.fetchPlanetSize();
+        }, 1000);
     }
 
     stopFetching() {
@@ -109,7 +110,7 @@ export class ExoGrid extends LitElement {
             if (data.Height && data.Width) {
                 this.rows = Number(data.Height);
                 this.cols = Number(data.Width);
-                this.stopFetching(); // Planetengröße bleibt konstant, keine weitere Abfrage nötig
+                //this.stopFetching(); // Planetengröße bleibt konstant, keine weitere Abfrage nötig
             }
         } catch (error) {
             console.error("Error fetching planet size:", error);
@@ -124,7 +125,6 @@ export class ExoGrid extends LitElement {
             }
 
             this.positions = await response.json();
-            this.requestUpdate(); // Erzwingt ein Update des Renders
         } catch (error) {
             console.error("Error fetching positions:", error);
         }
@@ -177,7 +177,7 @@ export class ExoGrid extends LitElement {
                         </div>
                     `)}
                 </div>
-                ${this.fetchIntervalId !== undefined ? html`<div class="loading">Lade Daten...</div>` : ''}
+                <!--${this.fetchIntervalId !== undefined ? html`<div class="loading">Lade Daten...</div>` : ''}-->
             </div>
         `;
     }
