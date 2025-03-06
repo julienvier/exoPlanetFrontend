@@ -6,7 +6,7 @@ import rotateRight from '../assets/rotate-right.svg';
 @customElement('robot-controls')
 export class RobotControls extends LitElement {
 
-    @property({ type: String }) robotName: string = 'ExoBot1';
+    @property({ type: String }) robotName: string = 'ExoBot';
 
     static styles = css`
         :host {
@@ -72,6 +72,22 @@ export class RobotControls extends LitElement {
             color: #333;
         }
     `;
+
+    connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener('robot-selected', this.handleRobotSelection);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('robot-selected', this.handleRobotSelection);
+    }
+
+    private handleRobotSelection = (event: Event) => {
+        const customEvent = event as CustomEvent;
+        this.robotName = customEvent.detail.robotName;
+        console.log(`Neuer Roboter ausgewählt: ${this.robotName} | Neuer Roboter in robot controls aktiv`);
+    };
 
     private async onMove() {
         try {
