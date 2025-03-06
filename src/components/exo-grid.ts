@@ -48,8 +48,8 @@ export class ExoGrid extends LitElement {
             color: white;
             transition: background 0.3s ease;
             border: 1px solid #222;
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
         }
         .nothing { background-color: white; }
         .sand { background-color: yellow; }
